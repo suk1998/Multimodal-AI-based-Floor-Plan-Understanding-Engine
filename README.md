@@ -337,3 +337,6 @@ backend/.venv/bin/python -B -m unittest \
 이 저장소에서는 `docs/`, 원본 PDF/PNG, GT, 모델 가중치, 가상 환경, 내부 실험 출력물, 비공개 데이터베이스 및 인증 정보가 제외되어 있습니다. 버전 관리된 스키마 생성기와 합성 테스트 소스는 포함되어 있으나, 생성된 프로젝트별 RDF 및 분석 결과는 포함되어 있지 않습니다.
 
 현재 한계점으로는 부분적인 실(방) 재구성, 불완전한 설비/호스트 접지(Grounding), 일부 변환에 대한 제한적인 처리, OCR 실패 및 구조적 근거가 불충분한 경우의 대응 보류 등이 있습니다. 실행에 성공했다고 해서 전체 도면을 완전히 이해했거나 모든 실제 변경 사항을 감지했음을 선언하는 것은 아닙니다.
+<img width="1846" height="1687" alt="설게도변경비교01" src="https://github.com/user-attachments/assets/9fc0b224-7281-4cbb-b898-30c8276908e6" />
+<img width="1798" height="1366" alt="설게도변경비교02" src="https://github.com/user-attachments/assets/84a922dd-a91d-4c8f-8060-b3e651b773c5" />
+
