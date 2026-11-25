@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {observationInput,bundleMatches,resultFrameMatches,observationLayer} from '../src/observations.ts';
+import type {ObservationBundle} from '../src/observations.ts';
+import {makeROI} from '../src/roi.ts';
+import type {NativeImage} from '../src/api.ts';
+const image={id:'TEST_ONLY:4:2:400x300',document:{id:'doc',sha256:'TEST_ONLY'},width:400,height:300,page:4,zoom:2} as NativeImage;
+const roi=makeROI(image,[[20.125,30.5],[200.75,30.5],[200.75,180.5],[20.125,180.5]]);let count=0;
+const test=(name:string,f:()=>void)=>{f();count++;console.log('PASS',name)};
+test('request preserves native float bbox, target role and full image binding',()=>{const input=observationInput(image,roi);assert.deepEqual(input.roi_bbox_native,[20.125,30.5,200.75,180.5]);assert.equal(input.source_role,'Target');assert.equal(input.image.frame_id,'Target:'+image.id);assert.equal(input.context_margin_px,48)});
+test('legacy non-rectangle is not silently turned into an analysis bbox',()=>assert.throws(()=>observationInput(image,makeROI(image,[[20,30],[200,35],[195,180],[25,175]])),/보정/));
+test('stale ROI from another PDF cannot be analyzed using a new image',()=>assert.throws(()=>observationInput({...image,id:'new',document:{...image.document,sha256:'new'}},roi),/다릅니다/));
+test('result display requires same document, image frame and exact ROI',()=>{const b={frame_id:'Target:'+image.id,source_binding:{document_id:'doc',image_id:image.id},analysis_scope:{core_roi:{bbox_native:[20.125,30.5,200.75,180.5]}}} as ObservationBundle;assert.ok(bundleMatches(b,image,roi));assert.equal(bundleMatches(b,{...image,document:{...image.document,id:'other'}},roi),false);assert.equal(bundleMatches(b,image,makeROI(image,[[21,30],[201,30],[201,181],[21,181]])),false);assert.equal(bundleMatches(b,image,null),false)});
+test('primitive layers do not classify text or curves as architectural spaces',()=>{assert.equal(observationLayer('TextRegion'),'text');assert.equal(observationLayer('PdfCurve'),'curves');assert.equal(observationLayer('RasterContour'),'curves');assert.equal(observationLayer('BandContact'),'points');assert.equal(observationLayer('ParallelBoundaries'),'parallel')});
+test('completed snapshots stay bound to the source frame independently of ROI edits',()=>{const b={frame_id:'Target:'+image.id,source_binding:{document_id:'doc',image_id:image.id},analysis_scope:{core_roi:{bbox_native:[20.125,30.5,200.75,180.5]}}} as ObservationBundle;const edited=makeROI(image,[[40,50],[220,50],[220,200],[40,200]]);assert.ok(resultFrameMatches(b,image));assert.equal(bundleMatches(b,image,edited),false);assert.equal(resultFrameMatches(b,{...image,id:'another-page'}),false);assert.equal(resultFrameMatches(b,{...image,document:{...image.document,id:'new-upload'}}),false)});
+test('a skew ROI with the same extent is still stale and requires rectangular analysis',()=>{const b={frame_id:'Target:'+image.id,source_binding:{document_id:'doc',image_id:image.id},analysis_scope:{core_roi:{bbox_native:[20,30,200,180]}}} as ObservationBundle;assert.equal(bundleMatches(b,image,makeROI(image,[[20,30],[200,35],[195,180],[25,175]])),false)});
+console.log(count+' observation UI contract checks passed');

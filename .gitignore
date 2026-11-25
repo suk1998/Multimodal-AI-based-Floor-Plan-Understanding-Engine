@@ -1,0 +1,79 @@
+# =====================================
+# FPUE - GitHub Public Repository
+# =====================================
+
+# Python environments
+.floorplan/
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# AI models and checkpoints
+poc/models/
+models/
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.onnx
+*.pdparams
+
+# Frontend dependencies and build
+node_modules/
+frontend/dist/
+frontend/.vite/
+dist/
+build/
+
+# Original architectural drawings and GT
+source_pdfs/
+GT/
+*.pdf
+
+# Internal documentation
+docs/
+
+# Experimental and validation outputs
+*_validation/
+Output/
+output/
+results/
+poc/results/
+analysis/
+comparison_reassessment/
+
+# Runtime and local data
+var/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.tmp
+*.bak
+
+# Credentials and environment variables
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archives
+*.zip
+*.tar.gz
+*.7z

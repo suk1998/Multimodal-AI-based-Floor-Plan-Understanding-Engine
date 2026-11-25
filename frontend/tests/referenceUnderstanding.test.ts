@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import type {NativeImage} from '../src/api.ts';
+import {referenceInput,referenceMatches,referenceBoundarySegments,referenceFocus} from '../src/referenceUnderstanding.ts';
+import type {ReferenceBundle,ReferenceCase} from '../src/referenceUnderstanding.ts';
+const image={id:'sha:4:2:2382x1684',document:{id:'document',sha256:'sha',filename:'ref.pdf',page_count:8},page:4,zoom:2,width:2382,height:1684} as NativeImage;
+const input=referenceInput(image);
+assert.equal(input.source_role,'Ref');assert.equal(input.image.frame_id,'Ref:'+image.id);assert.ok(!('roi_bbox_native' in input));
+const bundle={schema_version:'reference_understanding_bundle/1',source_role:'Ref',frame_id:input.image.frame_id,source_binding:{...input.image,source_role:'Ref',document_id:image.document.id,page:4}} as ReferenceBundle;
+assert.ok(referenceMatches(bundle,image));
+for(const altered of [{page:5},{zoom:1},{width:1191},{height:842},{id:'other'}, {document:{...image.document,id:'new-upload'}}, {document:{...image.document,sha256:'other'}}])assert.equal(referenceMatches(bundle,{...image,...altered}),false);
+assert.equal(referenceMatches({...bundle,source_role:'Target'} as unknown as ReferenceBundle,image),false);
+assert.equal(referenceMatches({...bundle,frame_id:'Target:'+image.id},image),false);
+assert.ok(referenceMatches(bundle,{...image,url:'blob:new-display-url'}));
+console.log('Ref native-source binding and independent-input checks passed');
+
+const partial={id:'partial',label:{name:'test only',seed:[50,50],observation:{polygon_native:[[40,40],[60,40],[60,60],[40,60]]}},after:{status:'PARTIAL_BOUNDARY',polygon_native:null,edges:[{side:'left',axis:'V',normal:20,observed_fraction:.5,observed_intervals:[[20,50]],inferred_intervals:[[50,80]]}]},full_space_extent_verified:false} as ReferenceCase;
+assert.deepEqual(referenceBoundarySegments(partial),[{inferred:false,points:[[20,20],[20,50]]},{inferred:true,points:[[20,50],[20,80]]}]);
+assert.deepEqual(referenceFocus(partial,{width:90,height:90}),[0,0,90,90]);
+assert.equal(partial.after.polygon_native,null);assert.equal(partial.full_space_extent_verified,false);
+console.log('Observed support, inferred closure and partial-case review focus remain separate');
