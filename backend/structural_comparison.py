@@ -633,6 +633,7 @@ def _with_dimensions(result,pages,geometries,alignment,vectors):
 def _finalize_changes(result,pages,geometries,alignment,annotation_decisions,strokes=None,vectors=None):
     from backend.element_grounding import attach_element_grounding, VERSION as grounding_version
     from backend.door_correspondence import attach_door_correspondence
+    from backend.boundary_aperture_comparison import attach_boundary_aperture_comparison
     from backend.comparison_claims import attach_claim_assessment
     from backend.symbol_comparison import enrich_marker_changes
     from backend.change_candidate_audit import attach_candidate_audit,VERSION
@@ -643,6 +644,8 @@ def _finalize_changes(result,pages,geometries,alignment,annotation_decisions,str
     result['annotation_decisions_enabled']=bool(annotation_decisions)
     attach_element_grounding(result,pages,geometries)
     attach_door_correspondence(result,pages,geometries,alignment,strokes,vectors,ComparisonScope(alignment))
+    if result.get('opening_geometry_decisions_enabled'):
+        attach_boundary_aperture_comparison(result,pages,geometries,alignment,strokes,vectors,ComparisonScope(alignment))
     attach_claim_assessment(result,geometries)
     attach_candidate_audit(result)
     result['run_id']=fingerprint([VERSION,policy_version,MARKER_LOCUS_VERSION,upstream_version,grounding_version,result['run_id'],bool(annotation_decisions),result.get('opening_geometry_decisions_enabled',False)])

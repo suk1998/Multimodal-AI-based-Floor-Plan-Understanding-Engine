@@ -433,5 +433,6 @@ def attach_door_correspondence(result,pages,geometries,alignment,strokes,vectors
         row['related_legacy_correspondence_ids']=related
         result['correspondences'].append(row)
     result['judgments']=dict(Counter(r['judgment'] for r in result['correspondences']))
+    if result['judgments'].get('CHANGED'):result['status']='REVIEW_AVAILABLE'
     result['run_id']=fingerprint([VERSION,policy.VERSION,result['run_id']])
     return result

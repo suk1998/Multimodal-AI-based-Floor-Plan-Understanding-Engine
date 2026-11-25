@@ -39,7 +39,7 @@ def attach_candidate_audit(result):
                 automatic_output={'status':row.get('output_disposition') or ('ELIGIBLE' if automatic else 'REVIEW_OR_NOT_CHANGED'),
                     'represented_by_correspondence_ids':row.get('represented_by_correspondence_ids',[]),
                     'reason_codes':symbol.get('reason_codes') or (['SCOPED_CHANGE_EVIDENCE_AVAILABLE'] if automatic else [row.get('output_disposition') or 'NO_AUTOMATIC_SCOPED_CHANGE_DECISION'])}),
-            claim_scope=(row.get('door_geometry_evidence') or row.get('opening_geometry_evidence') or {}).get('claim_scope') or (ontology_policy.CLAIM_SCOPE if row['entity_type']=='CodeMarker' and row['domain']=='ANNOTATION' else row['domain']),
+            claim_scope=(row.get('boundary_aperture_evidence') or row.get('door_geometry_evidence') or row.get('opening_geometry_evidence') or {}).get('claim_scope') or (ontology_policy.CLAIM_SCOPE if row['entity_type']=='CodeMarker' and row['domain']=='ANNOTATION' else row['domain']),
             claim_assessment=claim_assessment,
             decision_constraints=row.get('decision_constraints',[]),
             physical_change_inferred=row.get('physical_change_inferred'),decision_origin='ANALYSIS_SNAPSHOT_NOT_USER_REVIEW'))

@@ -17,6 +17,11 @@ def fact(status,reason,refs=()):
     return dict(status=status,reason_code=reason,evidence_refs=list(dict.fromkeys(refs)))
 
 def registration_fact(row):
+    boundary=row.get('boundary_aperture_evidence') or {}
+    if boundary:
+        sites=boundary.get('sites',[])
+        supported=bool(sites) and all(s.get('registration',{}).get('status')=='SUPPORTED_LOCAL_COORDINATE_CORRESPONDENCE' for s in sites)
+        return fact('SUPPORTED' if supported else 'HOLD','INDEPENDENT_BOUNDARY_APERTURE_LOCUS_SUPPORT' if supported else 'BOUNDARY_APERTURE_COORDINATES_UNCONFIRMED')
     door=row.get('door_geometry_evidence') or {}
     opening=row.get('opening_geometry_evidence') or {}
     if door:
@@ -142,6 +147,15 @@ def assess_claim(row,name,required,d,*,applicable_difference=True):
 def attach_claim_assessment(result,geometries):
     source_objects=result.get('source_objects',{});counts=Counter();blocked=Counter();mixed=0
     for row in result['correspondences']:
+        # Preserve the exact producer reasons; do not infer them from narrative.
+        constraints=list(row.get('decision_constraints',[]))
+        door=row.get('door_geometry_evidence') or {}
+        constraints.extend(door.get('reason_codes',[]))
+        opening=row.get('opening_geometry_evidence') or {}
+        registration=opening.get('registration') or {}
+        if opening and not opening.get('registration_supported') and registration.get('reason'):
+            constraints.append(registration['reason'])
+        row['decision_constraints']=list(dict.fromkeys(constraints))
         contexts=source_contexts(row,geometries,source_objects);d=dependencies(row,contexts)
         d['VERIFIED_CONNECTION_COMPARISON']=verified_connection_comparison(row,result['correspondences'])
         common=['BOTH_SOURCE_OBSERVATIONS','REGISTERED_COORDINATES','OBJECT_CORRESPONDENCE','INDEPENDENT_MEASUREMENT']

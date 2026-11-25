@@ -12,6 +12,7 @@ import numpy as np
 import pymupdf
 from backend.change_policy import is_supported_annotation_change, is_final_change_kind
 from backend.door_change_policy import is_door_drawing_row,is_supported_door_change
+from backend.boundary_aperture_comparison import is_boundary_aperture_row,is_supported_boundary_aperture_change
 from integrations.fpue_ontology.opening_change_contract import is_opening_drawing_row,is_supported_opening_change
 from backend.upstream_lineage import public_comparison
 
@@ -35,6 +36,7 @@ class ComparisonReview:
                     revision=self.revision, decisions=self.decisions)
 
     def confirmable(self, row):
+        if is_boundary_aperture_row(row) and not is_supported_boundary_aperture_change(row):return False
         if is_door_drawing_row(row) and not is_supported_door_change(row):return False
         if ((row.get('entity_type') in ('DimensionText','CodeMarker') and not is_supported_annotation_change(row))
             or (is_opening_drawing_row(row) and not is_supported_opening_change(row))):
